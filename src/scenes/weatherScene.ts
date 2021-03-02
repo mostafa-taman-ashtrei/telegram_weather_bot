@@ -2,10 +2,11 @@ import { Scenes } from 'telegraf';
 
 import getWeatherData from '../utils/getWeather';
 import reverseGeocoding from '../utils/reverseGeocoding';
+import TTS from '../utils/textToSpeech';
 
 const weatherScene = new Scenes.BaseScene<Scenes.SceneContext>('weatherScene');
 
-weatherScene.enter((ctx) => ctx.reply('Send me your location (:'));
+weatherScene.enter((ctx) => ctx.reply('Send me a location (:'));
 
 weatherScene.on('location', async (ctx) => {
     ctx.reply('Please wait while i get the weather');
@@ -13,13 +14,15 @@ weatherScene.on('location', async (ctx) => {
     const city = await reverseGeocoding(longitude, latitude);
     const data = await getWeatherData(city);
 
-    ctx.replyWithHTML(`
-        In ${city} :
-        The Tempreture is  ${data.temp} degress
-        The Minimum Tempreture is ${data.tempMin} degrees
-        The Maximum Tempreture is ${data.tempMax} degress
-        The Humidity is ${data.humidity}
-    `);
+    const reply = `In ${city} :
+        The Temperature is ${data.temp} degrees
+        The Minimum Temperature is ${data.tempMin} degrees
+        The Maximum Temperature is ${data.tempMax} degrees
+        and The Humidity is ${data.humidity}
+    `;
+
+    ctx.replyWithHTML(reply);
+    await TTS(reply, ctx);
 });
 
 weatherScene.command('/out', (ctx) => {
